@@ -1,6 +1,11 @@
 import React, { Component } from 'react'
-import { Form, Icon, Input, Button } from 'antd'
+import { Redirect } from 'react-router-dom'
+import { Form, Icon, Input, Button, message } from 'antd'
+import { reqLogin } from '../../api'
+import memoryUtils from '../../utils/memoryUtils'
+import storageUtils from '../../utils/storageUtils'
 import './login.less'
+
 // 登录
 class Login extends Component {
     constructor(props) {
@@ -8,6 +13,11 @@ class Login extends Component {
         this.state = {}
     }
     render() {
+        const user = memoryUtils.user
+        // 登录跳转首页
+        if (user && user._id) {
+            return <Redirect to="/" />
+        }
         const Item = Form.Item
         const { getFieldDecorator } = this.props.form
         return (
@@ -79,9 +89,18 @@ class Login extends Component {
 
     handleSubmit = e => {
         e.preventDefault()
-        this.props.form.validateFields((err, values) => {
+        this.props.form.validateFields(async (err, values) => {
             if (!err) {
-                console.log(values)
+                const res = await reqLogin(values)
+                if (res.status === 0) {
+                    // 保存用户数据
+                    memoryUtils.user = res.data
+                    storageUtils.setStore('userData', res.data)
+                    this.props.history.replace('/')
+                    message.success('登录成功')
+                } else {
+                    message.error(res.msg)
+                }
             }
         })
     }
@@ -92,7 +111,7 @@ class Login extends Component {
             callback('密码不能为空')
         } else if (value.length < 4) {
             callback('密码不能小于4位')
-        } else if (value.length < 12) {
+        } else if (value.length > 12) {
             callback('密码不能大于12位')
         } else if (!/^[a-zA-z0-9_]+$/.test(value)) {
             callback('密码必须由英文、数字或下划线组成')
