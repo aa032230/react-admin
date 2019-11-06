@@ -10,6 +10,9 @@ class siderMenu extends Component {
         super(props)
         this.state = {}
     }
+    componentWillMount() {
+        this.menuArr = this.getMenuNodes(menuList)
+    }
     render() {
         const path = this.props.location.pathname
         return (
@@ -19,18 +22,18 @@ class siderMenu extends Component {
                 </Link>
                 <Menu
                     selectedKeys={[path]}
-                    defaultOpenKeys={['sub1']}
+                    defaultOpenKeys={this.openKey}
                     mode="inline"
                     theme="dark"
                 >
-                    {this.getMenuNodes(menuList)}
+                    {this.menuArr}
                 </Menu>
             </div>
         )
     }
 
-    // 根据数据生成菜单节点 map版
-    getMenuNodes_map = menuList => {
+    // 根据数据生成菜单节点
+    getMenuNodes = menuList => {
         return menuList.map(item => {
             if (item.children) {
                 return (
@@ -57,38 +60,6 @@ class siderMenu extends Component {
                 )
             }
         })
-    }
-
-    // reduce版
-    getMenuNodes = menuList => {
-        return menuList.reduce((pre, item) => {
-            if (item.children) {
-                pre.push(
-                    <SubMenu
-                        key={item.key}
-                        title={
-                            <span>
-                                <Icon type={item.icon} />
-                                <span>{item.title}</span>
-                            </span>
-                        }
-                    >
-                        {this.getMenuNodes(item.children)}
-                    </SubMenu>
-                )
-            } else {
-                pre.push(
-                    <Menu.Item key={item.key}>
-                        <Link to={item.key}>
-                            <Icon type={item.icon} />
-                            <span>{item.title}</span>
-                        </Link>
-                    </Menu.Item>
-                )
-            }
-
-            return pre
-        }, [])
     }
 }
 /**
