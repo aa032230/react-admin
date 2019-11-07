@@ -20,6 +20,16 @@ export const updateCategroy = params =>
 export const getCategoryInfoById = params =>
     ajax('/manage/category/info', params)
 
+// 获取商品列表
+export const getProductList = params => ajax('/manage/product/list', params)
+
+//根据搜索条件获取商品
+export const getSearchProduct = params => ajax('/manage/product/search', params)
+
+// 修改商品状态
+export const updateProductStatus = params =>
+    ajax('/manage/product/updateStatus', params, 'post')
+
 //jsonp请求天气
 export const reqWeather = city => {
     const url = `http://api.map.baidu.com/telematics/v3/weather?location=${city}&output=json&ak=3p49MVra6urFRGOT9s8UBWr2`

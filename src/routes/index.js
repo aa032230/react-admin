@@ -1,6 +1,6 @@
 import Home from '../pages/home/home'
 import Category from '../pages/category/category'
-import Product from '../pages/product/product'
+import Product from '../pages/product'
 import Role from '../pages/role/role'
 import User from '../pages/user/user'
 import Bar from '../pages/charts/bar'

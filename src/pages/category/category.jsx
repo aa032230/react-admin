@@ -89,36 +89,46 @@ class Category extends Component {
     }
     // 返回父级节点
     toParentCategory = () => {
-        this.setState({ parentId: 0, parentName: '', subData: [] })
+        this.setState({ parentId: 0, parentName: '', subData: [] }, () => {
+            this.getList()
+        })
     }
     // 添加 or 修改分类
-    addOrEditCategory = async () => {
-        const { showStatus } = this.state
-        const params = this.props.form.getFieldsValue()
-        // 添加
-        if (showStatus === 1) {
-            const res = await addCategory(params)
-            if (res.status === 0) {
-                this.setState({ visible: false }, () => {
-                    message.success('添加成功')
-                    this.getList()
-                })
+    addOrEditCategory = () => {
+        this.props.form.validateFields(async (err, values) => {
+            if (!err) {
+                const { showStatus } = this.state
+                // 添加
+                if (showStatus === 1) {
+                    const res = await addCategory(values)
+                    if (res.status === 0) {
+                        this.setState({ visible: false }, () => {
+                            message.success('添加成功')
+                            this.getList()
+                        })
+                    }
+                } else {
+                    // 修改
+                    const res = await updateCategroy({
+                        categoryId: this.row._id,
+                        categoryName: values.categoryName
+                    })
+                    if (res.status === 0) {
+                        this.setState({ visible: false }, () => {
+                            message.success('更新成功')
+                            this.getList()
+                        })
+                    }
+                }
+                this.props.form.resetFields()
             }
-        } else {
-            // 修改
-            const res = await updateCategroy({
-                categoryId: this.row._id,
-                categoryName: params.categoryName
-            })
-            if (res.status === 0) {
-                this.setState({ visible: false }, () => {
-                    message.success('更新成功')
-                    this.getList()
-                })
-            }
-        }
+        })
     }
-    handleChange = () => {}
+    // 关闭模态框
+    handleCancel = () => {
+        this.setState({ visible: false })
+        this.props.form.resetFields()
+    }
     render() {
         const {
             columns,
@@ -172,20 +182,19 @@ class Category extends Component {
                     title={showStatus === 1 ? '添加分类' : '修改分类'}
                     visible={this.state.visible}
                     onOk={this.addOrEditCategory}
-                    onCancel={() => this.setState({ visible: false })}
+                    onCancel={this.handleCancel}
                 >
                     <Form>
                         <Hidden visible={showStatus === 1}>
                             <Form.Item>
                                 {getFieldDecorator('parentId', {
-                                    initialValue: '0'
+                                    initialValue: `${parentId}`
                                 })(
                                     <Select
                                         style={{
                                             width: '100%',
                                             marginBottom: '15px'
                                         }}
-                                        onChange={this.handleChange}
                                     >
                                         <Option key="0" value="0">
                                             一级分类
@@ -206,7 +215,13 @@ class Category extends Component {
                         <Form.Item>
                             {getFieldDecorator('categoryName', {
                                 initialValue:
-                                    showStatus === 2 ? this.row.name : ''
+                                    showStatus === 2 ? this.row.name : '',
+                                rules: [
+                                    {
+                                        required: true,
+                                        message: '请输入分类名称'
+                                    }
+                                ]
                             })(<Input placeholder="请输入分类名称" />)}
                         </Form.Item>
                     </Form>
