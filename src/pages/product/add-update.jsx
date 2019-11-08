@@ -1,7 +1,8 @@
 import React, { Component } from 'react'
-import { Card, Button, Form, Input, Cascader } from 'antd'
+import { Card, Button, Form, Input, Cascader, message } from 'antd'
 import PicturesWall from './pictures-wall'
-import { getCategoryList } from '../../api'
+import RichTextEditor from './rich-text-editor'
+import { getCategoryList, addPorduct, updatePorduct } from '../../api'
 const { TextArea } = Input
 
 class ProductAddUpdate extends Component {
@@ -13,9 +14,10 @@ class ProductAddUpdate extends Component {
         }
 
         this.pic = React.createRef()
+        this.editor = React.createRef()
     }
     async componentDidMount() {
-        this.options = await this.getCategory()
+        this.options = await this.getCategory(0)
     }
     componentWillMount() {
         const product = this.props.location.state
@@ -24,7 +26,7 @@ class ProductAddUpdate extends Component {
     }
 
     // 初始分类数据
-    initCategory = categorys => {
+    initCategory = async categorys => {
         const options = categorys.map(c => ({
             value: c._id,
             label: c.name,
@@ -35,26 +37,22 @@ class ProductAddUpdate extends Component {
         const { product, isEdit } = this
         const { pCategoryId } = product
         if (isEdit && pCategoryId !== '0') {
-            this.setState({ parentId: pCategoryId }, async () => {
-                const sub = await this.getCategory()
-                const child = sub.map(c => ({ value: c._id, label: c.name }))
-                // 获取当前商品对应的一级option 对象
-                const targetOption = options.find(
-                    option => option.value === pCategoryId
-                )
-                targetOption.children = child
-                this.setState({ options })
-            })
-        } else {
+            const sub = await this.getCategory(pCategoryId)
+            const child = sub.map(c => ({ value: c._id, label: c.name }))
+            // 获取当前商品对应的一级option 对象
+            const targetOption = options.find(
+                option => option.value === pCategoryId
+            )
+            targetOption.children = child
             this.setState({ options })
         }
+
+        this.setState({ options })
     }
 
     // 获取分类
-    getCategory = async () => {
-        const { parentId } = this.state
+    getCategory = async parentId => {
         const res = await getCategoryList({ parentId })
-
         if (res.status === 0) {
             if (parentId === 0) {
                 this.initCategory(res.data)
@@ -66,10 +64,52 @@ class ProductAddUpdate extends Component {
 
     // 提交表单
     handleSubmit = () => {
-        this.props.form.validateFields((err, val) => {
+        // |categoryId    |Y       |string   |分类ID
+        // |pCategoryId   |Y       |string   |父分类ID
+        // |name          |Y       |string   |商品名称
+        // |desc          |N       |string   |商品描述
+        // |price         |N       |string   |商品价格
+        // |detail        |N       |string   |商品详情
+        // |imgs          |N       |array   |商品图片名数组
+        this.props.form.validateFields(async (err, val) => {
             if (!err) {
-                const img = this.pic.current.getImages()
                 console.log(val)
+                const imgs = this.pic.current.getImages()
+                const detail = this.editor.current.getDetail()
+                let pCategoryId, categoryId
+                if (val.cids.length === 1) {
+                    pCategoryId = '0'
+                    categoryId = val.cids[0]
+                } else {
+                    ;[pCategoryId, categoryId] = val.cids
+                }
+
+                console.log(pCategoryId, categoryId)
+                const parmas = {
+                    imgs,
+                    detail,
+                    pCategoryId,
+                    categoryId,
+                    name: val.name,
+                    desc: val.desc,
+                    price: val.price
+                }
+                if (this.isEdit) {
+                    //修改
+                    // 添加
+                    const res = await updatePorduct(parmas)
+                    if (res.status === 0) {
+                        message.success('修改成功')
+                        this.props.history.goBack()
+                    }
+                } else {
+                    // 添加
+                    const res = await addPorduct(parmas)
+                    if (res.status === 0) {
+                        message.success('添加成功')
+                        this.props.history.goBack()
+                    }
+                }
             }
         })
     }
@@ -83,24 +123,23 @@ class ProductAddUpdate extends Component {
         }
     }
     // 加载子类
-    loadData = selectedOptions => {
+    loadData = async selectedOptions => {
         const targetOption = selectedOptions[0]
         targetOption.loading = true
-        this.setState({ parentId: targetOption.value }, async () => {
-            const sub = await this.getCategory()
-            if (sub && sub.length) {
-                targetOption.children = sub.map(c => ({
-                    label: c.name,
-                    value: c._id
-                }))
-            } else {
-                targetOption.isLeaf = true // 没有二级分类
-            }
-            targetOption.loading = false
 
-            this.setState({
-                options: [...this.state.options]
-            })
+        const sub = await this.getCategory(targetOption.value)
+        if (sub && sub.length) {
+            targetOption.children = sub.map(c => ({
+                label: c.name,
+                value: c._id
+            }))
+        } else {
+            targetOption.isLeaf = true // 没有二级分类
+        }
+        targetOption.loading = false
+
+        this.setState({
+            options: [...this.state.options]
         })
     }
 
@@ -118,7 +157,7 @@ class ProductAddUpdate extends Component {
         const { product, isEdit } = this
         const { pCategoryId, categoryId } = product
         const categoryIds = []
-        if (pCategoryId === 0) {
+        if (pCategoryId === '0') {
             categoryIds.push(categoryId)
         } else {
             categoryIds.push(pCategoryId, categoryId)
@@ -182,6 +221,17 @@ class ProductAddUpdate extends Component {
                     </Form.Item>
                     <Form.Item label="商品图片：">
                         <PicturesWall ref={this.pic} imgs={product.imgs} />
+                    </Form.Item>
+
+                    <Form.Item
+                        label="商品详情："
+                        labelCol={{ span: 2 }}
+                        wrapperCol={{ span: 16 }}
+                    >
+                        <RichTextEditor
+                            ref={this.editor}
+                            detail={product.detail}
+                        />
                     </Form.Item>
                     <Form.Item>
                         <Button

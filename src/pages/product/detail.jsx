@@ -75,7 +75,11 @@ class Detail extends Component {
                         {product.imgs.map(item => (
                             <img
                                 key={item}
-                                style={{ width: '80px', height: '80px' }}
+                                style={{
+                                    width: '80px',
+                                    height: '80px',
+                                    marginLeft: 10
+                                }}
                                 src={BASEURL + item}
                                 alt="item"
                             />

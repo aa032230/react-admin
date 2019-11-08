@@ -13,7 +13,7 @@ class Product extends Component {
             tableData: [],
             total: 0,
             pageNum: 1,
-            pageSize: 1,
+            pageSize: 5,
             loading: true,
             searchName: '',
             searchType: 'productName'
@@ -132,6 +132,7 @@ class Product extends Component {
 
     // 分页
     handleCurrentPage = (pageNum, pageSize) => {
+        console.log(pageNum, pageSize)
         this.setState({ pageNum, pageSize }, () => {
             this.getList()
         })
@@ -193,7 +194,7 @@ class Product extends Component {
             <div className="product">
                 <Card title={title} extra={extra}>
                     <Table
-                        rowKey="categoryId"
+                        rowKey="_id"
                         bordered
                         dataSource={tableData}
                         columns={this.columns}

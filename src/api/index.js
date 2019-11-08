@@ -30,6 +30,13 @@ export const getSearchProduct = params => ajax('/manage/product/search', params)
 export const updateProductStatus = params =>
     ajax('/manage/product/updateStatus', params, 'post')
 
+// 添加商品
+export const addPorduct = params => ajax('/manage/product/add', params, 'post')
+
+// 编辑商品
+export const updatePorduct = params =>
+    ajax('/manage/product/update', params, 'post')
+
 // 删除商品图片
 export const postDeleteImg = params =>
     ajax('/manage/img/delete', params, 'post')
