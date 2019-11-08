@@ -14,7 +14,12 @@ class siderMenu extends Component {
         this.menuArr = this.getMenuNodes(menuList)
     }
     render() {
-        const path = this.props.location.pathname
+        let path = this.props.location.pathname
+        const path2 = '/' + path.split('/')[1]
+        //当前请求的路由及其子路由匹配
+        if (path.indexOf(path2) === 0) {
+            path = path2
+        }
         return (
             <div className="menu">
                 <Link to="/" className="menu-header">
@@ -34,8 +39,15 @@ class siderMenu extends Component {
 
     // 根据数据生成菜单节点
     getMenuNodes = menuList => {
+        const path = this.props.location.pathname
         return menuList.map(item => {
             if (item.children) {
+                const cItem = item.children.find(
+                    cItem => path.indexOf(cItem.key) === 0
+                )
+                if (cItem) {
+                    this.openKey = item.key
+                }
                 return (
                     <SubMenu
                         key={item.key}

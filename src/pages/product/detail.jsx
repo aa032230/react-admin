@@ -20,9 +20,15 @@ class Detail extends Component {
             const res = await getCategoryInfoById({ categoryId })
             this.setState({ cname1: res.data.name })
         } else {
-            const res1 = await getCategoryInfoById({ categoryId: pCategoryId })
-            const res2 = await getCategoryInfoById({ categoryId })
-            this.setState({ cname1: res1.data.name, cname2: res2.data.name })
+            //一次性发多个请求，只有都成功才正常处理
+            const res = await Promise.all([
+                getCategoryInfoById({ categoryId: pCategoryId }),
+                getCategoryInfoById({ categoryId })
+            ])
+            this.setState({
+                cname1: res[0].data.name,
+                cname2: res[1].data.name
+            })
         }
     }
     render() {

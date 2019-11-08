@@ -30,6 +30,10 @@ export const getSearchProduct = params => ajax('/manage/product/search', params)
 export const updateProductStatus = params =>
     ajax('/manage/product/updateStatus', params, 'post')
 
+// 删除商品图片
+export const postDeleteImg = params =>
+    ajax('/manage/img/delete', params, 'post')
+
 //jsonp请求天气
 export const reqWeather = city => {
     const url = `http://api.map.baidu.com/telematics/v3/weather?location=${city}&output=json&ak=3p49MVra6urFRGOT9s8UBWr2`
