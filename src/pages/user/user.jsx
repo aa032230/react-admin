@@ -153,6 +153,7 @@ class User extends Component {
             okText: '确定',
             okType: 'danger',
             cancelText: '取消',
+
             onOk: async () => {
                 this.setState({ loading: true })
                 const res = await postDeleteUser({ userId: scope._id })
