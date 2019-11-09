@@ -1,9 +1,11 @@
 import React, { Component } from 'react'
 import { Card, Button, Table, message } from 'antd'
+import { connect } from 'react-redux'
 import { getRoleList, postAddRole, postUpdateRole } from '../../api'
 import RoleAddForm from './add-form'
 import RoleAuthForm from './auth-from'
 import dateUtils from '../../utils/dateUtils'
+import { logout } from '../../store/actions'
 // 角色
 class Role extends Component {
     constructor(props) {
@@ -100,7 +102,12 @@ class Role extends Component {
         const res = await postUpdateRole(nodes)
         if (res.status === 0) {
             message.success('权限更新成功')
-            this.setState({ isShowAuth: false, role: res.data })
+            // 如果更新的是自己的权限，强制退出
+            if (nodes._id === this.props.user._id) {
+                this.props.logout()
+            } else {
+                this.setState({ isShowAuth: false, role: res.data })
+            }
         }
     }
 
@@ -165,4 +172,9 @@ class Role extends Component {
     }
 }
 
-export default Role
+export default connect(
+    state => ({
+        user: state.user
+    }),
+    { logout }
+)(Role)

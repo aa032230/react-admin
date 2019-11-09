@@ -2,6 +2,7 @@ import React, { Component } from 'react'
 import { Modal, Input, Tree } from 'antd'
 import PropTypes from 'prop-types'
 import menuList from '../../config/menuConfig'
+import { connect } from 'react-redux'
 const { TreeNode } = Tree
 class RoleAuthForm extends Component {
     static propTypes = {
@@ -52,7 +53,7 @@ class RoleAuthForm extends Component {
         const params = {
             menus: this.state.checkedKeys,
             _id: role._id,
-            auth_name: role.name,
+            auth_name: this.props.user.username,
             auth_time: Date.now()
         }
         this.props.onOk(params)
@@ -100,4 +101,7 @@ class RoleAuthForm extends Component {
     }
 }
 
-export default RoleAuthForm
+export default connect(
+    state => ({ user: state.user }),
+    {}
+)(RoleAuthForm)

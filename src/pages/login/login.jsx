@@ -1,9 +1,8 @@
 import React, { Component } from 'react'
 import { Redirect } from 'react-router-dom'
-import { Form, Icon, Input, Button, message } from 'antd'
-import { reqLogin } from '../../api'
-import memoryUtils from '../../utils/memoryUtils'
-import storageUtils from '../../utils/storageUtils'
+import { Form, Icon, Input, Button } from 'antd'
+import { connect } from 'react-redux'
+import { login } from '../../store/actions'
 import './login.less'
 
 // 登录
@@ -13,10 +12,10 @@ class Login extends Component {
         this.state = {}
     }
     render() {
-        const user = memoryUtils.user
+        const user = this.props.user
         // 登录跳转首页
         if (user && user._id) {
-            return <Redirect to="/" />
+            return <Redirect to="/home" />
         }
         const Item = Form.Item
         const { getFieldDecorator } = this.props.form
@@ -26,6 +25,13 @@ class Login extends Component {
                     <h1>React项目: 后台管理系统</h1>
                 </header>
                 <section className="login-content">
+                    <div
+                        className={
+                            user.errorMsg ? 'error-msg show' : 'error-msg'
+                        }
+                    >
+                        {user.errorMsg}
+                    </div>
                     <h2>用户登陆</h2>
                     <Form onSubmit={this.handleSubmit} className="login-form">
                         <Item>
@@ -91,16 +97,9 @@ class Login extends Component {
         e.preventDefault()
         this.props.form.validateFields(async (err, values) => {
             if (!err) {
-                const res = await reqLogin(values)
-                if (res.status === 0) {
-                    // 保存用户数据
-                    memoryUtils.user = res.data
-                    storageUtils.setStore('userData', res.data)
-                    this.props.history.replace('/')
-                    message.success('登录成功')
-                } else {
-                    message.error(res.msg)
-                }
+                this.props.login(values)
+            } else {
+                console.log('校验失败')
             }
         })
     }
@@ -120,5 +119,9 @@ class Login extends Component {
         }
     }
 }
+const WrapLogin = Form.create()(Login)
 
-export default Form.create({ name: 'login' })(Login)
+export default connect(
+    state => ({ user: state.user }),
+    { login }
+)(WrapLogin)

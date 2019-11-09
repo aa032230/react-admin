@@ -1,20 +1,19 @@
 import React, { Component } from 'react'
 import { Redirect, Route, Switch } from 'react-router-dom'
 import { Layout } from 'antd'
-
-import memoryUtils from '../../utils/memoryUtils'
+import { connect } from 'react-redux'
 import SiderMenu from '../../components/siderMenu'
 import Header from '../../components/header'
-import routes from '../../routes'
+import routes from './routes'
 // 主页
-class admin extends Component {
+class Admin extends Component {
     constructor(props) {
         super(props)
         this.state = {}
     }
     render() {
         const { Footer, Sider, Content } = Layout
-        const user = memoryUtils.user
+        const user = this.props.user
         // 没有登录跳转login
         if (!user || !user._id) {
             return <Redirect to="/login" />
@@ -50,4 +49,7 @@ class admin extends Component {
     }
 }
 
-export default admin
+export default connect(
+    state => ({ user: state.user }),
+    {}
+)(Admin)
