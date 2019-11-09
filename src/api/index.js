@@ -23,9 +23,6 @@ export const getCategoryInfoById = params =>
 // 获取商品列表
 export const getProductList = params => ajax('/manage/product/list', params)
 
-//根据搜索条件获取商品
-export const getSearchProduct = params => ajax('/manage/product/search', params)
-
 // 修改商品状态
 export const updateProductStatus = params =>
     ajax('/manage/product/updateStatus', params, 'post')
@@ -40,6 +37,19 @@ export const updatePorduct = params =>
 // 删除商品图片
 export const postDeleteImg = params =>
     ajax('/manage/img/delete', params, 'post')
+
+// 根据搜索条件获取商品
+export const getSearchProduct = params => ajax('/manage/product/search', params)
+
+// 获取角色列表
+export const getRoleList = () => ajax('/manage/role/list')
+
+// 添加角色
+export const postAddRole = params => ajax('/manage/role/add', params, 'post')
+
+// 更新角色权限
+export const postUpdateRole = params =>
+    ajax('/manage/role/update', params, 'post')
 
 //jsonp请求天气
 export const reqWeather = city => {
