@@ -51,6 +51,20 @@ export const postAddRole = params => ajax('/manage/role/add', params, 'post')
 export const postUpdateRole = params =>
     ajax('/manage/role/update', params, 'post')
 
+// 获取用户列表
+export const getUserList = () => ajax('/manage/user/list')
+
+// 添加用户
+export const postAddUser = params => ajax('/manage/user/add', params, 'post')
+
+// 更新用户
+export const postEditUser = params =>
+    ajax('/manage/user/update', params, 'post')
+
+// 删除用户
+export const postDeleteUser = params =>
+    ajax('/manage/user/delete', params, 'post')
+
 //jsonp请求天气
 export const reqWeather = city => {
     const url = `http://api.map.baidu.com/telematics/v3/weather?location=${city}&output=json&ak=3p49MVra6urFRGOT9s8UBWr2`
